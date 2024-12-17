@@ -1,12 +1,4 @@
-import {
-  Paperclip,
-  Send,
-  Image as ImageIcon,
-  X,
-  AlertTriangle,
-  Trash,
-  Edit,
-} from "lucide-react";
+import { Paperclip, Send, X, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "./ui/button";
@@ -16,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useMessages, type Attachment } from "@/hooks/useMessages";
 import { Textarea } from "./ui/textarea";
+import { MessageBubble } from "./messages/MessageBubble";
 
 export const DisputeResolution = () => {
   const [message, setMessage] = useState("");
@@ -116,56 +109,12 @@ export const DisputeResolution = () => {
               </div>
             ) : (
               messages.map((msg) => (
-                <div
+                <MessageBubble
                   key={msg.id}
-                  className={`message-bubble group ${
-                    msg.sender === "user" ? "sent" : "received"
-                  }`}
-                >
-                  <div className="flex justify-between items-start gap-2">
-                    <p>{msg.content}</p>
-                    {msg.sender === "user" && (
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleEdit(msg.id, msg.content)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(msg.id)}
-                        >
-                          <Trash className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {msg.attachments.map((attachment, index) => (
-                        <div
-                          key={index}
-                          className="relative bg-background/10 rounded p-2 text-sm"
-                        >
-                          {attachment.type === "image" ? (
-                            <ImageIcon className="h-4 w-4" />
-                          ) : (
-                            <Paperclip className="h-4 w-4" />
-                          )}
-                          <span className="ml-2">{attachment.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="timestamp">
-                    {new Date(msg.timestamp).toLocaleTimeString()}
-                  </div>
-                </div>
+                  message={msg}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               ))
             )}
           </div>
