@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --card-hover: 0 0% 98%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg;
+}
+
+.message-bubble {
+  @apply relative px-4 py-2 rounded-2xl max-w-[80%] break-words animate-fade-in;
+}
+
+.message-bubble.sent {
+  @apply bg-primary text-primary-foreground ml-auto rounded-tr-none;
+}
+
+.message-bubble.received {
+  @apply bg-secondary text-secondary-foreground rounded-tl-none;
+}
+
+.message-bubble .timestamp {
+  @apply text-xs opacity-70 mt-1;
+}
+
+.message-area {
+  @apply flex flex-col h-[calc(100vh-20rem)] md:h-[400px] bg-gradient-to-b from-background to-secondary/20;
+}
+
+.message-list {
+  @apply flex-1 overflow-y-auto space-y-4 p-4 scrollbar scrollbar-track-transparent scrollbar-thumb-secondary/50 hover:scrollbar-thumb-secondary/80;
+}
+
+.message-input-area {
+  @apply sticky bottom-0 bg-background/80 backdrop-blur-sm border-t p-4;
+}
+
+.attachment-preview {
+  @apply flex flex-wrap gap-2 p-2 border-t;
+}
+
+.attachment-item {
+  @apply flex items-center gap-2 bg-secondary/50 p-2 rounded-lg text-sm;
+}
+
+.status-badge {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.status-badge.pending {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-badge.completed {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-badge.rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+.dispute-timeline {
+  @apply relative pl-8 before:absolute before:left-3 before:top-0 before:h-full before:w-0.5 before:bg-border;
+}
+
+.dispute-timeline-item {
+  @apply relative mb-8 last:mb-0;
+}
+
+.dispute-timeline-item::before {
+  @apply absolute -left-5 top-1.5 h-3 w-3 rounded-full bg-primary content-[''];
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
