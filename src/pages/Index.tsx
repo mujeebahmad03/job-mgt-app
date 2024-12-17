@@ -4,10 +4,21 @@ import { ActionButtons } from "@/components/ActionButtons";
 import { Chat } from "@/components/Chat";
 import { Job } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, AlertTriangle } from "lucide-react";
+import {
+  MessageSquare,
+  AlertTriangle,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { DisputeResolution } from "@/components/DisputeResolution";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const Index = () => {
+  const [isOpen, setIsOpen] = useState(true);
   const [job] = useState<Job>({
     do_shop_id: "123",
     business_name: "Tech Solutions Inc.",
@@ -48,24 +59,43 @@ const Index = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Chat with Client
-            </TabsTrigger>
-            <TabsTrigger value="dispute" className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Dispute Resolution
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="chat" className="mt-6">
-            <Chat />
-          </TabsContent>
-          <TabsContent value="dispute" className="mt-6">
-            <DisputeResolution />
-          </TabsContent>
-        </Tabs>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-card hover:bg-accent rounded-lg transition-colors cursor-pointer group">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              <span className="font-medium">Messages & Disputes</span>
+            </div>
+            {isOpen ? (
+              <ChevronUp className="h-5 w-5 transition-transform duration-200" />
+            ) : (
+              <ChevronDown className="h-5 w-5 transition-transform duration-200" />
+            )}
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="animate-accordion-down mt-2">
+            <Tabs defaultValue="chat" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="chat" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Chat with Client
+                </TabsTrigger>
+                <TabsTrigger
+                  value="dispute"
+                  className="flex items-center gap-2"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Dispute Resolution
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="chat" className="mt-6">
+                <Chat />
+              </TabsContent>
+              <TabsContent value="dispute" className="mt-6">
+                <DisputeResolution />
+              </TabsContent>
+            </Tabs>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );
