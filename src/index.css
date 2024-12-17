@@ -58,7 +58,7 @@
 }
 
 .message-bubble.sent {
-  @apply bg-primary text-primary-foreground ml-auto rounded-tr-none;
+  @apply bg-primary text-primary-foreground ml-auto rounded-tr-none hover:group-[]:opacity-100;
 }
 
 .message-bubble.received {
