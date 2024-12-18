@@ -68,7 +68,7 @@ const Index = () => {
           <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-card hover:bg-accent rounded-lg transition-colors cursor-pointer group">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              <span className="font-medium">Messages & Disputes</span>
+              <span className="font-medium">Messages & Issues</span>
             </div>
             {isOpen ? (
               <ChevronUp className="h-5 w-5 transition-transform duration-200" />
