@@ -8,7 +8,7 @@ export interface Attachment {
 export interface Message {
   id: string;
   content: string;
-  sender: "user" | "client" | "admin";
+  sender: "user" | "client" | "admin" | "system";
   timestamp: Date;
   attachments?: Attachment[];
 }
@@ -61,5 +61,23 @@ export const messagesApi = {
     const messages = await messagesApi.getMessages(storageKey);
     const updatedMessages = messages.filter((msg) => msg.id !== messageId);
     localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+  },
+
+  addSystemMessage: async (
+    storageKey: string,
+    content: string
+  ): Promise<Message> => {
+    const systemMessage: Message = {
+      id: Date.now().toString(),
+      content,
+      sender: "system",
+      timestamp: new Date(),
+    };
+
+    const currentMessages = await messagesApi.getMessages(storageKey);
+    const updatedMessages = [...currentMessages, systemMessage];
+    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+
+    return systemMessage;
   },
 };

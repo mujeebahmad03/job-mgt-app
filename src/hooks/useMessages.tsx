@@ -29,6 +29,14 @@ export const useMessages = ({ storageKey }: UseMessagesProps) => {
     },
   });
 
+  const { mutate: addSystemMessage } = useMutation({
+    mutationFn: (content: string) =>
+      messagesApi.addSystemMessage(storageKey, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages", storageKey] });
+    },
+  });
+
   const { mutate: editMessage } = useMutation({
     mutationFn: ({
       messageId,
@@ -56,6 +64,7 @@ export const useMessages = ({ storageKey }: UseMessagesProps) => {
     addMessage: (content: string, attachments: Attachment[] = []) => {
       addMessage({ content, attachments });
     },
+    addSystemMessage,
     editMessage,
     deleteMessage,
   };
