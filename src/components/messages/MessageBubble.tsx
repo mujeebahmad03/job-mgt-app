@@ -14,6 +14,19 @@ export const MessageBubble = ({
   onEdit,
   onDelete,
 }: MessageBubbleProps) => {
+  if (message.sender === "system") {
+    return (
+      <div className="flex justify-center my-6">
+        <div className="message-bubble system bg-success/20 text-success-foreground border border-success/30 px-6 py-3 animate-scale-in">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <p className="text-sm font-medium">{message.content}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div
       className={`message-bubble ${

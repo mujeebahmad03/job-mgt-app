@@ -16,6 +16,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useMessages } from "@/hooks/useMessages";
 
 const Index = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -37,8 +38,12 @@ const Index = () => {
     },
   });
 
+  const { addSystemMessage } = useMessages({ storageKey: "chat-messages" });
+
   const handleComplete = () => {
-    console.log("Job completed");
+    addSystemMessage(
+      "🎉 Project has been completed and verified by the client! Thank you for your work."
+    );
   };
 
   const handleReject = () => {
