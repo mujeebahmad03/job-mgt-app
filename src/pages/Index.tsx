@@ -10,7 +10,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { DisputeResolution } from "@/components/DisputeResolution";
+import { IssueResolution } from "@/components/IssueResolution";
 import {
   Collapsible,
   CollapsibleContent,
@@ -84,10 +84,7 @@ const Index = () => {
                   <MessageSquare className="h-4 w-4" />
                   Messages
                 </TabsTrigger>
-                <TabsTrigger
-                  value="dispute"
-                  className="flex items-center gap-2"
-                >
+                <TabsTrigger value="issue" className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   Issue Resolution
                 </TabsTrigger>
@@ -95,8 +92,8 @@ const Index = () => {
               <TabsContent value="chat" className="mt-6">
                 <Chat />
               </TabsContent>
-              <TabsContent value="dispute" className="mt-6">
-                <DisputeResolution jobId={job.do_shop_id} />
+              <TabsContent value="issue" className="mt-6">
+                <IssueResolution jobId={job.do_shop_id} />
               </TabsContent>
             </Tabs>
           </CollapsibleContent>
