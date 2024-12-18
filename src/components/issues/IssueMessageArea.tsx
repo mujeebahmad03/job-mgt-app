@@ -6,19 +6,19 @@ import { MessageBubble } from "@/components/messages/MessageBubble";
 import { Paperclip, Send, X } from "lucide-react";
 import { type Message, type Attachment } from "@/services/messages";
 
-interface DisputeMessageAreaProps {
+interface IssueMessageAreaProps {
   messages: Message[];
   onSendMessage: (content: string, attachments: Attachment[]) => void;
   onBack?: () => void;
   showBackButton?: boolean;
 }
 
-export const DisputeMessageArea = ({
+export const IssueMessageArea = ({
   messages,
   onSendMessage,
   onBack,
   showBackButton,
-}: DisputeMessageAreaProps) => {
+}: IssueMessageAreaProps) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
@@ -65,7 +65,7 @@ export const DisputeMessageArea = ({
       {showBackButton && (
         <div className="sticky top-0 z-10 p-2 bg-background/80 backdrop-blur-sm border-b">
           <Button variant="ghost" size="sm" onClick={onBack} className="w-full">
-            Back to Disputes
+            Back to Issues
           </Button>
         </div>
       )}
@@ -127,7 +127,7 @@ export const DisputeMessageArea = ({
               type="file"
               multiple
               className="hidden"
-              id="dispute-attachments"
+              id="issue-attachments"
               onChange={handleAttachment}
               accept="image/*,.pdf,.doc,.docx,.txt"
             />
@@ -136,7 +136,7 @@ export const DisputeMessageArea = ({
               variant="outline"
               size="icon"
               onClick={() =>
-                document.getElementById("dispute-attachments")?.click()
+                document.getElementById("issue-attachments")?.click()
               }
             >
               <Paperclip className="h-4 w-4" />

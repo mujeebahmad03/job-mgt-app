@@ -15,7 +15,7 @@ export interface Job {
   };
 }
 
-export type DisputeCategory =
+export type IssueCategory =
   | "payment_delay"
   | "quality_issues"
   | "scope_changes"
@@ -24,16 +24,16 @@ export type DisputeCategory =
   | "technical_issues"
   | "other";
 
-export interface Dispute {
+export interface Issue {
   id: string;
   jobId: string;
-  category: DisputeCategory;
+  category: IssueCategory;
   title: string;
   status: "open" | "resolved";
   createdAt: Date;
 }
 
-export const DISPUTE_CATEGORIES: Record<DisputeCategory, string> = {
+export const ISSUE_CATEGORIES: Record<IssueCategory, string> = {
   payment_delay: "Payment Delay",
   quality_issues: "Quality Issues",
   scope_changes: "Scope Changes",

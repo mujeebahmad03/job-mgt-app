@@ -109,15 +109,15 @@
   @apply bg-red-100 text-red-800;
 }
 
-.dispute-timeline {
+.issue-timeline {
   @apply relative pl-8 before:absolute before:left-3 before:top-0 before:h-full before:w-0.5 before:bg-border;
 }
 
-.dispute-timeline-item {
+.issue-timeline-item {
   @apply relative mb-8 last:mb-0;
 }
 
-.dispute-timeline-item::before {
+.issue-timeline-item::before {
   @apply absolute -left-5 top-1.5 h-3 w-3 rounded-full bg-primary content-[''];
 }
 

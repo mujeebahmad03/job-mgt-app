@@ -1,25 +1,25 @@
-import { Dispute, DisputeCategory } from "@/types";
+import { Issue, IssueCategory } from "@/types";
 import { Message, Attachment } from "./messages";
 
-const STORAGE_PREFIX = "dispute";
+const STORAGE_PREFIX = "issue";
 
-export const disputesApi = {
-  getDisputes: async (jobId: string): Promise<Dispute[]> => {
+export const issuesApi = {
+  getIssues: async (jobId: string): Promise<Issue[]> => {
     const stored = localStorage.getItem(`${STORAGE_PREFIX}_${jobId}`);
     if (!stored) return [];
-    return JSON.parse(stored).map((dispute: Dispute) => ({
-      ...dispute,
-      createdAt: new Date(dispute.createdAt),
+    return JSON.parse(stored).map((issue: Issue) => ({
+      ...issue,
+      createdAt: new Date(issue.createdAt),
     }));
   },
 
-  createDispute: async (
+  createIssue: async (
     jobId: string,
-    category: DisputeCategory,
+    category: IssueCategory,
     title: string
-  ): Promise<Dispute> => {
-    const disputes = await disputesApi.getDisputes(jobId);
-    const newDispute: Dispute = {
+  ): Promise<Issue> => {
+    const issues = await issuesApi.getIssues(jobId);
+    const newIssue: Issue = {
       id: Date.now().toString(),
       jobId,
       category,
@@ -30,14 +30,14 @@ export const disputesApi = {
 
     localStorage.setItem(
       `${STORAGE_PREFIX}_${jobId}`,
-      JSON.stringify([...disputes, newDispute])
+      JSON.stringify([...issues, newIssue])
     );
-    return newDispute;
+    return newIssue;
   },
 
-  getDisputeMessages: async (disputeId: string): Promise<Message[]> => {
+  getIssueMessages: async (issueId: string): Promise<Message[]> => {
     const stored = localStorage.getItem(
-      `${STORAGE_PREFIX}_messages_${disputeId}`
+      `${STORAGE_PREFIX}_messages_${issueId}`
     );
     if (!stored) return [];
     return JSON.parse(stored).map((msg: Message) => ({
@@ -46,13 +46,13 @@ export const disputesApi = {
     }));
   },
 
-  addDisputeMessage: async (
-    disputeId: string,
+  addIssueMessage: async (
+    issueId: string,
     content: string,
     sender: Message["sender"],
     attachments: Attachment[] = []
   ): Promise<Message> => {
-    const messages = await disputesApi.getDisputeMessages(disputeId);
+    const messages = await issuesApi.getIssueMessages(issueId);
     const newMessage: Message = {
       id: Date.now().toString(),
       content,
@@ -62,7 +62,7 @@ export const disputesApi = {
     };
 
     localStorage.setItem(
-      `${STORAGE_PREFIX}_messages_${disputeId}`,
+      `${STORAGE_PREFIX}_messages_${issueId}`,
       JSON.stringify([...messages, newMessage])
     );
     return newMessage;
