@@ -1,201 +1,175 @@
-import { Paperclip, Send, X, AlertTriangle } from "lucide-react";
 import { useState } from "react";
-
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { AlertTriangle, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "./ui/button";
+import { DisputeList } from "./disputes/DisputeList";
+import { DisputeMessageArea } from "./disputes/DisputeMessageArea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "./ui/input";
 
 import { useToast } from "@/hooks/use-toast";
-import { useMessages, type Attachment } from "@/hooks/useMessages";
-import { Textarea } from "./ui/textarea";
-import { MessageBubble } from "./messages/MessageBubble";
+import { useDisputes, useDisputeMessages } from "@/hooks/useDispute";
+import { DISPUTE_CATEGORIES, DisputeCategory } from "@/types";
+import { type Attachment } from "@/services/messages";
 
-export const DisputeResolution = () => {
-  const [message, setMessage] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+export const DisputeResolution = ({ jobId }: { jobId: string }) => {
+  const [selectedDisputeId, setSelectedDisputeId] = useState<string | null>(
+    null
+  );
+  const [isCreatingDispute, setIsCreatingDispute] = useState(false);
+  const [category, setCategory] = useState<DisputeCategory | "">("");
+  const [title, setTitle] = useState("");
+  const [showDisputes, setShowDisputes] = useState(true);
 
   const { toast } = useToast();
+  const { disputes, createDispute } = useDisputes(jobId);
+  const { messages, addMessage } = useDisputeMessages(selectedDisputeId || "");
+  const isMobile = useIsMobile();
 
-  const { messages, addMessage, isLoading, editMessage, deleteMessage } =
-    useMessages({
-      storageKey: "dispute-messages",
-    });
-
-  const handleAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newAttachments: Attachment[] = await Promise.all(
-      files.map(async (file) => {
-        const isImage = file.type.startsWith("image/");
-        const attachment: Attachment = {
-          type: isImage ? "image" : "file",
-          url: URL.createObjectURL(file),
-          name: file.name,
-        };
-
-        if (isImage) {
-          attachment.preview = attachment.url;
-        }
-
-        return attachment;
-      })
-    );
-    setAttachments((prev) => [...prev, ...newAttachments]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => {
-      const newAttachments = prev.filter((_, i) => i !== index);
-      // Cleanup URLs to prevent memory leaks
-      URL.revokeObjectURL(prev[index].url);
-      return newAttachments;
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() && attachments.length === 0) return;
-
-    if (editingMessageId) {
-      editMessage({ messageId: editingMessageId, content: message });
-      setEditingMessageId(null);
+  const handleCreateDispute = () => {
+    if (!category || !title.trim()) {
       toast({
-        title: "Message updated",
-        description: "Your message has been updated successfully.",
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
       });
-    } else {
-      addMessage(message, attachments);
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent to the admin.",
-      });
+      return;
     }
 
-    setMessage("");
-    setAttachments([]);
-  };
+    createDispute({ category, title: title.trim() });
+    setIsCreatingDispute(false);
+    setCategory("");
+    setTitle("");
 
-  const handleEdit = (messageId: string, content: string) => {
-    setEditingMessageId(messageId);
-    setMessage(content);
-  };
-
-  const handleDelete = (messageId: string) => {
-    deleteMessage(messageId);
     toast({
-      title: "Message deleted",
-      description: "Your message has been deleted successfully.",
+      title: "Dispute created",
+      description: "Your dispute has been created successfully.",
+    });
+  };
+
+  const handleDisputeSelect = (disputeId: string) => {
+    setSelectedDisputeId(disputeId);
+    if (isMobile) {
+      setShowDisputes(false);
+    }
+  };
+
+  const handleSendMessage = (content: string, attachments: Attachment[]) => {
+    addMessage(content, attachments);
+    toast({
+      title: "Message sent",
+      description: "Your message has been sent to the admin.",
     });
   };
 
   return (
     <Card className="glass-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          Dispute Resolution
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Dispute Resolution
+          </CardTitle>
+          <Dialog open={isCreatingDispute} onOpenChange={setIsCreatingDispute}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                New Dispute
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Dispute</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Category</label>
+                  <Select
+                    value={category}
+                    onValueChange={(value) =>
+                      setCategory(value as DisputeCategory)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(DISPUTE_CATEGORIES).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Title</label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter dispute title"
+                  />
+                </div>
+                <Button onClick={handleCreateDispute} className="w-full">
+                  Create Dispute
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="message-area">
-          <div className="message-list">
-            {isLoading ? (
-              <div className="text-center text-muted-foreground">
-                Loading...
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="text-center text-muted-foreground">
-                No messages yet
-              </div>
-            ) : (
-              messages.map((msg) => (
-                <MessageBubble
-                  key={msg.id}
-                  message={msg}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
+        <div
+          className={`grid ${
+            isMobile ? "grid-cols-1" : "grid-cols-12"
+          } divide-y md:divide-y-0 md:divide-x`}
+        >
+          <div
+            className={`${
+              isMobile ? (showDisputes ? "block" : "hidden") : "col-span-4"
+            } p-4`}
+          >
+            <DisputeList
+              disputes={disputes}
+              selectedDisputeId={selectedDisputeId}
+              onSelect={handleDisputeSelect}
+            />
           </div>
 
-          {attachments.length > 0 && (
-            <div className="attachment-preview">
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((file, index) => (
-                  <div key={index} className="attachment-item group relative">
-                    {file.type === "image" ? (
-                      <>
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden">
-                          <img
-                            src={file.preview}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Paperclip className="h-4 w-4" />
-                        <span className="text-sm">{file.name}</span>
-                      </>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => removeAttachment(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+          <div
+            className={`${
+              isMobile ? (!showDisputes ? "block" : "hidden") : "col-span-8"
+            }`}
+          >
+            {selectedDisputeId ? (
+              <DisputeMessageArea
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                onBack={() => setShowDisputes(true)}
+                showBackButton={isMobile}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                Select a dispute to view messages
               </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="message-input-area">
-            <div className="flex gap-2">
-              <div className="flex-1 min-h-[40px] max-h-[160px]">
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={
-                    editingMessageId
-                      ? "Edit your message..."
-                      : "Type your message to admin..."
-                  }
-                  className="min-h-[40px] max-h-[160px] resize-none"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  id="dispute-attachments"
-                  onChange={handleAttachment}
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    document.getElementById("dispute-attachments")?.click()
-                  }
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={!message.trim() && attachments.length === 0}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </form>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

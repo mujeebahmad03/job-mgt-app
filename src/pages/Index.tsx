@@ -82,21 +82,21 @@ const Index = () => {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chat" className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
-                  Chat with Client
+                  Messages
                 </TabsTrigger>
                 <TabsTrigger
                   value="dispute"
                   className="flex items-center gap-2"
                 >
                   <AlertTriangle className="h-4 w-4" />
-                  Dispute Resolution
+                  Issue Resolution
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="chat" className="mt-6">
                 <Chat />
               </TabsContent>
               <TabsContent value="dispute" className="mt-6">
-                <DisputeResolution />
+                <DisputeResolution jobId={job.do_shop_id} />
               </TabsContent>
             </Tabs>
           </CollapsibleContent>
