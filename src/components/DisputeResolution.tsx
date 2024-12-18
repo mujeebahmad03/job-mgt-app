@@ -56,7 +56,7 @@ export const DisputeResolution = ({ jobId }: { jobId: string }) => {
     setTitle("");
 
     toast({
-      title: "Dispute created",
+      title: "Issue created",
       description: "Your dispute has been created successfully.",
     });
   };
@@ -82,7 +82,7 @@ export const DisputeResolution = ({ jobId }: { jobId: string }) => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Dispute Resolution
+            Issue Resolution
           </CardTitle>
           <Dialog open={isCreatingDispute} onOpenChange={setIsCreatingDispute}>
             <DialogTrigger asChild>

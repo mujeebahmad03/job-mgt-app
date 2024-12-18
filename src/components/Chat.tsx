@@ -91,7 +91,7 @@ export const Chat = () => {
   return (
     <Card className="glass-card">
       <CardHeader>
-        <CardTitle>Messages</CardTitle>
+        <CardTitle>Message</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="message-area">
