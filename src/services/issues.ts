@@ -1,4 +1,4 @@
-import { Issue, IssueCategory } from "@/types";
+import { Issue, IssueCategory, MESSAGE_EDIT_WINDOW } from "@/types";
 import { Message, Attachment } from "./messages";
 
 const STORAGE_PREFIX = "issue";
@@ -66,5 +66,36 @@ export const issuesApi = {
       JSON.stringify([...messages, newMessage])
     );
     return newMessage;
+  },
+
+  editIssueMessage: async (
+    disputeId: string,
+    messageId: string,
+    content: string
+  ): Promise<Message> => {
+    const messages = await issuesApi.getIssueMessages(disputeId);
+    const messageToEdit = messages.find((m) => m.id === messageId);
+
+    if (!messageToEdit) {
+      throw new Error("Message not found");
+    }
+
+    if (
+      Date.now() - new Date(messageToEdit.timestamp).getTime() >
+      MESSAGE_EDIT_WINDOW
+    ) {
+      throw new Error("Message can no longer be edited");
+    }
+
+    const updatedMessages = messages.map((msg) =>
+      msg.id === messageId ? { ...msg, content } : msg
+    );
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_messages_${disputeId}`,
+      JSON.stringify(updatedMessages)
+    );
+
+    return { ...messageToEdit, content };
   },
 };

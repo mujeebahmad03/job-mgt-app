@@ -1,18 +1,20 @@
-import { Paperclip, Send, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 import { useToast } from "@/hooks/use-toast";
-import { useMessages, type Attachment } from "@/hooks/useMessages";
-import { Textarea } from "./ui/textarea";
+import {
+  useMessages,
+  type Message,
+  type Attachment,
+} from "@/hooks/useMessages";
 import { MessageBubble } from "./messages/MessageBubble";
+import { MessageInput } from "./messages/MessageInput";
 
 export const Chat = () => {
-  const [message, setMessage] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
 
   const { toast } = useToast();
@@ -22,62 +24,39 @@ export const Chat = () => {
       storageKey: "chat-messages",
     });
 
-  const handleAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newAttachments: Attachment[] = await Promise.all(
-      files.map(async (file) => {
-        const isImage = file.type.startsWith("image/");
-        const attachment: Attachment = {
-          type: isImage ? "image" : "file",
-          url: URL.createObjectURL(file),
-          name: file.name,
-        };
-
-        if (isImage) {
-          attachment.preview = attachment.url;
-        }
-
-        return attachment;
-      })
-    );
-    setAttachments((prev) => [...prev, ...newAttachments]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => {
-      const newAttachments = prev.filter((_, i) => i !== index);
-      // Cleanup URLs to prevent memory leaks
-      URL.revokeObjectURL(prev[index].url);
-      return newAttachments;
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() && attachments.length === 0) return;
-
+  const handleSubmit = (content: string, attachments: Attachment[]) => {
     if (editingMessageId) {
-      editMessage({ messageId: editingMessageId, content: message });
+      editMessage({
+        messageId: editingMessageId,
+        content,
+      });
       setEditingMessageId(null);
       toast({
         title: "Message updated",
         description: "Your message has been updated successfully.",
       });
     } else {
-      addMessage(message, attachments);
+      const replyToData = replyingTo
+        ? {
+            id: replyingTo.id,
+            content: replyingTo.content,
+            sender: replyingTo.sender,
+          }
+        : undefined;
+
+      addMessage(content, attachments, replyToData);
       toast({
         title: "Message sent",
         description: "Your message has been sent successfully.",
       });
     }
 
-    setMessage("");
-    setAttachments([]);
+    setReplyingTo(null);
   };
 
   const handleEdit = (messageId: string, content: string) => {
     setEditingMessageId(messageId);
-    setMessage(content);
+    setReplyingTo(null);
   };
 
   const handleDelete = (messageId: string) => {
@@ -86,6 +65,11 @@ export const Chat = () => {
       title: "Message deleted",
       description: "Your message has been deleted successfully.",
     });
+  };
+
+  const handleReply = (message: Message) => {
+    setReplyingTo(message);
+    setEditingMessageId(null);
   };
 
   return (
@@ -111,88 +95,40 @@ export const Chat = () => {
                   message={msg}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onReply={handleReply}
                 />
               ))
             )}
           </div>
 
-          {attachments.length > 0 && (
-            <div className="attachment-preview">
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((file, index) => (
-                  <div key={index} className="attachment-item group relative">
-                    {file.type === "image" ? (
-                      <>
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden">
-                          <img
-                            src={file.preview}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Paperclip className="h-4 w-4" />
-                        <span className="text-sm">{file.name}</span>
-                      </>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => removeAttachment(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+          {replyingTo && (
+            <div className="reply-preview bg-secondary/20 p-2 border-t">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Replying to message from {replyingTo.sender}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setReplyingTo(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
+              <p className="text-sm truncate">{replyingTo.content}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="message-input-area">
-            <div className="flex gap-2">
-              <div className="flex-1 min-h-[40px] max-h-[160px]">
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={
-                    editingMessageId
-                      ? "Edit your message..."
-                      : "Type your message..."
-                  }
-                  className="min-h-[40px] max-h-[160px] resize-none"
-                />
-              </div>
-              <div className="flex gap-2 items-end">
-                <Input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  id="attachments"
-                  onChange={handleAttachment}
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    document.getElementById("attachments")?.click()
-                  }
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={!message.trim() && attachments.length === 0}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </form>
+          <MessageInput
+            onSubmit={handleSubmit}
+            isEditing={!!editingMessageId}
+            initialContent={
+              editingMessageId
+                ? messages.find((m) => m.id === editingMessageId)?.content
+                : ""
+            }
+          />
         </div>
       </CardContent>
     </Card>

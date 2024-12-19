@@ -42,3 +42,5 @@ export const ISSUE_CATEGORIES: Record<IssueCategory, string> = {
   technical_issues: "Technical Issues",
   other: "Other Issue",
 };
+
+export const MESSAGE_EDIT_WINDOW = 30 * 60 * 1000;

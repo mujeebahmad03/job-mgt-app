@@ -35,7 +35,9 @@ export const IssueResolution = ({ jobId }: { jobId: string }) => {
 
   const { toast } = useToast();
   const { issues, createIssue } = useIssues(jobId);
-  const { messages, addMessage } = useIssueMessages(selectedIssueId || "");
+  const { messages, addMessage, editMessage } = useIssueMessages(
+    selectedIssueId || ""
+  );
   const isMobile = useIsMobile();
 
   const handleCreateIssue = () => {
@@ -71,6 +73,14 @@ export const IssueResolution = ({ jobId }: { jobId: string }) => {
     toast({
       title: "Message sent",
       description: "Your message has been sent to the admin.",
+    });
+  };
+
+  const handleEditMessage = (messageId: string, content: string) => {
+    editMessage(messageId, content);
+    toast({
+      title: "Message updated",
+      description: "Your message has been updated successfully.",
     });
   };
 
@@ -159,6 +169,7 @@ export const IssueResolution = ({ jobId }: { jobId: string }) => {
               <IssueMessageArea
                 messages={messages}
                 onSendMessage={handleSendMessage}
+                onEditMessage={handleEditMessage}
                 onBack={() => setShowIssues(true)}
                 showBackButton={isMobile}
               />

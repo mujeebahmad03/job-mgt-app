@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { Paperclip, Send, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageBubble } from "@/components/messages/MessageBubble";
-import { Paperclip, Send, X } from "lucide-react";
 import { type Message, type Attachment } from "@/services/messages";
+import { MESSAGE_EDIT_WINDOW } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface IssueMessageAreaProps {
   messages: Message[];
   onSendMessage: (content: string, attachments: Attachment[]) => void;
+  onEditMessage?: (messageId: string, content: string) => void;
   onBack?: () => void;
   showBackButton?: boolean;
 }
@@ -16,11 +19,13 @@ interface IssueMessageAreaProps {
 export const IssueMessageArea = ({
   messages,
   onSendMessage,
+  onEditMessage,
   onBack,
   showBackButton,
 }: IssueMessageAreaProps) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const { toast } = useToast();
 
   const handleAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -60,12 +65,32 @@ export const IssueMessageArea = ({
     setAttachments([]);
   };
 
+  const canEditMessage = (timestamp: Date) => {
+    return Date.now() - new Date(timestamp).getTime() <= MESSAGE_EDIT_WINDOW;
+  };
+
+  const handleEdit = (messageId: string, content: string) => {
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+
+    if (!canEditMessage(message.timestamp)) {
+      toast({
+        title: "Cannot edit message",
+        description: "Messages can only be edited within 30 minutes of sending",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onEditMessage?.(messageId, content);
+  };
+
   return (
     <div className="message-area">
       {showBackButton && (
         <div className="sticky top-0 z-10 p-2 bg-background/80 backdrop-blur-sm border-b">
           <Button variant="ghost" size="sm" onClick={onBack} className="w-full">
-            Back to Issues
+            Back to Disputes
           </Button>
         </div>
       )}
@@ -75,7 +100,14 @@ export const IssueMessageArea = ({
             No messages yet
           </div>
         ) : (
-          messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
+          messages.map((msg) => (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              onEdit={handleEdit}
+              isIssue={true}
+            />
+          ))
         )}
       </div>
 
@@ -127,7 +159,7 @@ export const IssueMessageArea = ({
               type="file"
               multiple
               className="hidden"
-              id="issue-attachments"
+              id="dispute-attachments"
               onChange={handleAttachment}
               accept="image/*,.pdf,.doc,.docx,.txt"
             />
@@ -136,7 +168,7 @@ export const IssueMessageArea = ({
               variant="outline"
               size="icon"
               onClick={() =>
-                document.getElementById("issue-attachments")?.click()
+                document.getElementById("dispute-attachments")?.click()
               }
             >
               <Paperclip className="h-4 w-4" />

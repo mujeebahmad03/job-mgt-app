@@ -54,11 +54,24 @@ export const useIssueMessages = (issueId: string) => {
     },
   });
 
+  const { mutate: editMessage } = useMutation({
+    mutationFn: (data: { messageId: string; content: string }) =>
+      issuesApi.editIssueMessage(issueId, data.messageId, data.content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["issue-messages", issueId],
+      });
+    },
+  });
+
   return {
     isFetchingIssueMessages,
     messages,
     addMessage: (content: string, attachments: Attachment[] = []) => {
       addMessage({ content, attachments });
+    },
+    editMessage: (messageId: string, content: string) => {
+      editMessage({ messageId, content });
     },
   };
 };
