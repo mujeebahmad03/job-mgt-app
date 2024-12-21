@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { issuesApi } from "@/services/issues";
 import { IssueCategory } from "@/types";
-import { Attachment } from "./useMessages";
+import { Message, type Attachment } from "@/services/messages";
 
 export const useIssues = (jobId: string) => {
   const queryClient = useQueryClient();
 
-  const { data: issues = [], isLoading: isGettingIssues } = useQuery({
+  const { data: issues = [] } = useQuery({
     queryKey: ["issues", jobId],
     queryFn: () => issuesApi.getIssues(jobId),
   });
@@ -25,7 +25,6 @@ export const useIssues = (jobId: string) => {
   });
 
   return {
-    isGettingIssues,
     issues,
     createIssue,
   };
@@ -34,18 +33,23 @@ export const useIssues = (jobId: string) => {
 export const useIssueMessages = (issueId: string) => {
   const queryClient = useQueryClient();
 
-  const { data: messages = [], isLoading: isFetchingIssueMessages } = useQuery({
+  const { data: messages = [] } = useQuery({
     queryKey: ["issue-messages", issueId],
     queryFn: () => issuesApi.getIssueMessages(issueId),
   });
 
   const { mutate: addMessage } = useMutation({
-    mutationFn: (data: { content: string; attachments: Attachment[] }) =>
+    mutationFn: (data: {
+      content: string;
+      attachments: Attachment[];
+      replyTo?: Message["replyTo"];
+    }) =>
       issuesApi.addIssueMessage(
         issueId,
         data.content,
         "user",
-        data.attachments
+        data.attachments,
+        data.replyTo
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -54,11 +58,38 @@ export const useIssueMessages = (issueId: string) => {
     },
   });
 
-  return {
-    isFetchingIssueMessages,
-    messages,
-    addMessage: (content: string, attachments: Attachment[] = []) => {
-      addMessage({ content, attachments });
+  const { mutate: editMessage } = useMutation({
+    mutationFn: (data: { messageId: string; content: string }) =>
+      issuesApi.editIssueMessage(issueId, data.messageId, data.content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["issue-messages", issueId],
+      });
     },
+  });
+
+  const { mutate: deleteMessage } = useMutation({
+    mutationFn: (messageId: string) =>
+      issuesApi.deleteIssueMessage(issueId, messageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["issue-messages", issueId],
+      });
+    },
+  });
+
+  return {
+    messages,
+    addMessage: (
+      content: string,
+      attachments: Attachment[] = [],
+      replyTo?: Message["replyTo"]
+    ) => {
+      addMessage({ content, attachments, replyTo });
+    },
+    editMessage: (messageId: string, content: string) => {
+      editMessage({ messageId, content });
+    },
+    deleteMessage,
   };
 };

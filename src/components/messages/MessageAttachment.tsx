@@ -7,13 +7,10 @@ interface MessageAttachmentProps {
   index: number;
 }
 
-export const MessageAttachment = ({
-  attachment,
-  index,
-}: MessageAttachmentProps) => {
+export const MessageAttachment = ({ attachment, index }: MessageAttachmentProps) => {
   const handleDownload = () => {
     // Create an anchor element and trigger download
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = attachment.url;
     link.download = attachment.name;
     document.body.appendChild(link);

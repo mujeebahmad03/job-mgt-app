@@ -1,74 +1,181 @@
-import { Edit, Trash } from "lucide-react";
+import { MoreVertical, Edit, Reply, Check, CheckCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { MessageAttachment } from "./MessageAttachment";
+import { MessageReactions, type Reaction } from "./MessageReactions";
 import { type Message } from "@/services/messages";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface MessageBubbleProps {
   message: Message;
   onEdit?: (messageId: string, content: string) => void;
   onDelete?: (messageId: string) => void;
+  onReply?: (message: Message) => void;
+  onQuoteClick?: (messageId: string) => void;
+  isIssue?: boolean;
 }
 
 export const MessageBubble = ({
   message,
   onEdit,
   onDelete,
+  onReply,
+  onQuoteClick,
+  isIssue = false,
 }: MessageBubbleProps) => {
-  if (message.sender === "system") {
-    return (
-      <div className="flex justify-center my-6">
-        <div className="message-bubble system bg-success/20 text-success-foreground border border-success/30 px-6 py-3 animate-scale-in">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <p className="text-sm font-medium">{message.content}</p>
-          </div>
-        </div>
-      </div>
+  const isMobile = useIsMobile();
+  const [reactions, setReactions] = useState<Reaction[]>([
+    { type: "like", count: 0, reacted: false },
+    { type: "dislike", count: 0, reacted: false },
+    { type: "heart", count: 0, reacted: false },
+    { type: "smile", count: 0, reacted: false },
+    { type: "angry", count: 0, reacted: false },
+  ]);
+
+  const handleReaction = (type: Reaction["type"]) => {
+    setReactions((prev) =>
+      prev.map((reaction) =>
+        reaction.type === type
+          ? {
+              ...reaction,
+              count: reaction.reacted ? reaction.count - 1 : reaction.count + 1,
+              reacted: !reaction.reacted,
+            }
+          : reaction
+      )
     );
-  }
-  
+  };
+
   return (
-    <div
-      className={`message-bubble ${
-        message.sender === "user" ? "sent" : "received"
-      }`}
-    >
-      <div className="flex justify-between items-start gap-2">
-        <p>{message.content}</p>
-        {message.sender === "user" && onEdit && onDelete && (
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => onEdit(message.id, message.content)}
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-destructive hover:text-destructive"
-              onClick={() => onDelete(message.id)}
-            >
-              <Trash className="h-3 w-3" />
-            </Button>
+    <div className="group" id={`message-${message.id}`}>
+      <div
+        className={`message-bubble ${
+          message.sender === "user"
+            ? "sent"
+            : message.sender === "system"
+            ? "system"
+            : "received"
+        }`}
+      >
+        {message.replyTo && (
+          <div
+            className="reply-to cursor-pointer hover:bg-secondary/30 transition-colors"
+            onClick={() => onQuoteClick?.(message.replyTo!.id)}
+          >
+            <span className="text-muted-foreground">
+              Replying to {message.replyTo.sender}:
+            </span>
+            <p className="truncate">{message.replyTo.content}</p>
           </div>
         )}
-      </div>
-      {message.attachments && message.attachments.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {message.attachments.map((attachment, index) => (
-            <MessageAttachment
-              key={index}
-              attachment={attachment}
-              index={index}
-            />
-          ))}
+        <div className="flex justify-between items-start gap-2">
+          <p>{message.content}</p>
+          {message.sender === "user" && (onEdit || onReply) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${
+                    isMobile ? "bg-secondary/50" : ""
+                  } hover:bg-secondary`}
+                >
+                  <MoreVertical className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit && (
+                  <DropdownMenuItem
+                    onClick={() => onEdit(message.id, message.content)}
+                  >
+                    <Edit className="h-3 w-3 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {onReply && (
+                  <DropdownMenuItem onClick={() => onReply(message)}>
+                    <Reply className="h-3 w-3 mr-2" />
+                    Reply
+                  </DropdownMenuItem>
+                )}
+                {!isIssue && onDelete && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Message</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this message? This
+                          action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onDelete(message.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
-      )}
-      <div className="timestamp">
-        {new Date(message.timestamp).toLocaleTimeString()}
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {message.attachments.map((attachment, index) => (
+              <MessageAttachment
+                key={index}
+                attachment={attachment}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
+        <MessageReactions reactions={reactions} onReact={handleReaction} />
+        <div className="timestamp">
+          <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+          {message.edited && (
+            <span className="text-muted-foreground">(edited)</span>
+          )}
+          {message.sender === "user" && (
+            <span className="ml-auto">
+              {message.read ? (
+                <CheckCheck className="h-3 w-3 text-blue-500" />
+              ) : (
+                <Check className="h-3 w-3" />
+              )}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

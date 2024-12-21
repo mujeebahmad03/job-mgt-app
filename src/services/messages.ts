@@ -1,5 +1,5 @@
 export interface Attachment {
-  type: "file" | "image";
+  type: "image" | "file";
   url: string;
   name: string;
   preview?: string;
@@ -8,15 +8,23 @@ export interface Attachment {
 export interface Message {
   id: string;
   content: string;
-  sender: "user" | "client" | "admin" | "system";
+  sender: "user" | "client" | "system" | "admin";
   timestamp: Date;
   attachments?: Attachment[];
+  edited?: boolean;
+  read?: boolean;
+  replyTo?: {
+    id: string;
+    content: string;
+    sender: "user" | "client" | "system" | "admin";
+  };
 }
 
-// Simulated API functions that currently use localStorage
+const STORAGE_PREFIX = "messages";
+
 export const messagesApi = {
   getMessages: async (storageKey: string): Promise<Message[]> => {
-    const stored = localStorage.getItem(storageKey);
+    const stored = localStorage.getItem(`${STORAGE_PREFIX}_${storageKey}`);
     if (!stored) return [];
     return JSON.parse(stored).map((msg: Message) => ({
       ...msg,
@@ -26,19 +34,38 @@ export const messagesApi = {
 
   addMessage: async (
     storageKey: string,
-    message: Omit<Message, "id" | "timestamp">
+    messageData: {
+      content: string;
+      attachments: Attachment[];
+      sender: Message["sender"];
+      replyTo?: Message["replyTo"];
+    }
   ): Promise<Message> => {
+    const messages = await messagesApi.getMessages(storageKey);
     const newMessage: Message = {
-      ...message,
+      ...messageData,
       id: Date.now().toString(),
       timestamp: new Date(),
+      read: false,
     };
 
-    const currentMessages = await messagesApi.getMessages(storageKey);
-    const updatedMessages = [...currentMessages, newMessage];
-    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify([...messages, newMessage])
+    );
     return newMessage;
+  },
+
+  markAsRead: async (storageKey: string, messageId: string): Promise<void> => {
+    const messages = await messagesApi.getMessages(storageKey);
+    const updatedMessages = messages.map((msg) =>
+      msg.id === messageId ? { ...msg, read: true } : msg
+    );
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify(updatedMessages)
+    );
   },
 
   editMessage: async (
@@ -47,11 +74,22 @@ export const messagesApi = {
     content: string
   ): Promise<Message> => {
     const messages = await messagesApi.getMessages(storageKey);
+    const messageToEdit = messages.find((msg) => msg.id === messageId);
+
+    if (!messageToEdit) {
+      throw new Error("Message not found");
+    }
+
     const updatedMessages = messages.map((msg) =>
-      msg.id === messageId ? { ...msg, content } : msg
+      msg.id === messageId ? { ...msg, content, edited: true } : msg
     );
-    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-    return updatedMessages.find((msg) => msg.id === messageId)!;
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify(updatedMessages)
+    );
+
+    return { ...messageToEdit, content, edited: true };
   },
 
   deleteMessage: async (
@@ -60,24 +98,29 @@ export const messagesApi = {
   ): Promise<void> => {
     const messages = await messagesApi.getMessages(storageKey);
     const updatedMessages = messages.filter((msg) => msg.id !== messageId);
-    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify(updatedMessages)
+    );
   },
 
   addSystemMessage: async (
     storageKey: string,
     content: string
   ): Promise<Message> => {
-    const systemMessage: Message = {
+    const message: Message = {
       id: Date.now().toString(),
       content,
       sender: "system",
       timestamp: new Date(),
     };
 
-    const currentMessages = await messagesApi.getMessages(storageKey);
-    const updatedMessages = [...currentMessages, systemMessage];
-    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-
-    return systemMessage;
+    const messages = await messagesApi.getMessages(storageKey);
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify([...messages, message])
+    );
+    return message;
   },
 };

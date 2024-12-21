@@ -18,12 +18,25 @@ export const useMessages = ({ storageKey }: UseMessagesProps) => {
   });
 
   const { mutate: addMessage } = useMutation({
-    mutationFn: (messageData: { content: string; attachments: Attachment[] }) =>
+    mutationFn: (messageData: {
+      content: string;
+      attachments: Attachment[];
+      replyTo?: Message["replyTo"];
+    }) =>
       messagesApi.addMessage(storageKey, {
         content: messageData.content,
         attachments: messageData.attachments,
         sender: "user",
+        replyTo: messageData.replyTo,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages", storageKey] });
+    },
+  });
+
+  const { mutate: markAsRead } = useMutation({
+    mutationFn: (messageId: string) =>
+      messagesApi.markAsRead(storageKey, messageId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", storageKey] });
     },
@@ -59,15 +72,20 @@ export const useMessages = ({ storageKey }: UseMessagesProps) => {
   });
 
   return {
-    isLoading,
     messages,
-    addMessage: (content: string, attachments: Attachment[] = []) => {
-      addMessage({ content, attachments });
+    isLoading,
+    addMessage: (
+      content: string,
+      attachments: Attachment[] = [],
+      replyTo?: Message["replyTo"]
+    ) => {
+      addMessage({ content, attachments, replyTo });
     },
+    markAsRead,
     addSystemMessage,
     editMessage,
     deleteMessage,
   };
 };
 
-export type { Attachment, Message };
+export type { Message, Attachment };
