@@ -56,7 +56,7 @@ export const ActionButtons = ({
         <AlertDialogTrigger asChild>
           <Button
             variant="default"
-            className="bg-emerald-400 hover:bg-emerald-500/90 transition-colors"
+            className="bg-emerald-500 hover:bg-emerald-500/90 transition-colors"
           >
             <Check className="mr-2 h-4 w-4" />
             Complete Job

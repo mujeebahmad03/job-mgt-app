@@ -12,6 +12,7 @@ export interface Message {
   timestamp: Date;
   attachments?: Attachment[];
   edited?: boolean;
+  read?: boolean;
   replyTo?: {
     id: string;
     content: string;
@@ -45,6 +46,7 @@ export const messagesApi = {
       ...messageData,
       id: Date.now().toString(),
       timestamp: new Date(),
+      read: false,
     };
 
     localStorage.setItem(
@@ -52,6 +54,18 @@ export const messagesApi = {
       JSON.stringify([...messages, newMessage])
     );
     return newMessage;
+  },
+
+  markAsRead: async (storageKey: string, messageId: string): Promise<void> => {
+    const messages = await messagesApi.getMessages(storageKey);
+    const updatedMessages = messages.map((msg) =>
+      msg.id === messageId ? { ...msg, read: true } : msg
+    );
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_${storageKey}`,
+      JSON.stringify(updatedMessages)
+    );
   },
 
   editMessage: async (

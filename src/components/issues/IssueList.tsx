@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ISSUE_CATEGORIES, type Issue } from "@/types";
+import { type Issue, ISSUE_CATEGORIES } from "@/types";
 
 interface IssueListProps {
   issues: Issue[];

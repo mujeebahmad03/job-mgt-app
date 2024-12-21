@@ -1,8 +1,7 @@
-import { ExternalLink } from "lucide-react";
-
+import { Job } from "@/types";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Job } from "@/types";
+import { ExternalLink } from "lucide-react";
 
 interface JobCardProps {
   job: Job;
@@ -38,22 +37,16 @@ export const JobCard = ({ job }: JobCardProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h4 className="text-sm font-medium text-muted-foreground">
-            Description
-          </h4>
+          <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
           <p className="mt-1">{job.project_description}</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Duration
-            </h4>
+            <h4 className="text-sm font-medium text-muted-foreground">Duration</h4>
             <p className="mt-1">{job.project_duration || "Not specified"}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Amount
-            </h4>
+            <h4 className="text-sm font-medium text-muted-foreground">Amount</h4>
             <p className="mt-1">{job.amount || "Not specified"}</p>
           </div>
         </div>

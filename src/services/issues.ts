@@ -50,7 +50,8 @@ export const issuesApi = {
     issueId: string,
     content: string,
     sender: Message["sender"],
-    attachments: Attachment[] = []
+    attachments: Attachment[] = [],
+    replyTo?: Message["replyTo"]
   ): Promise<Message> => {
     const messages = await issuesApi.getIssueMessages(issueId);
     const newMessage: Message = {
@@ -59,6 +60,7 @@ export const issuesApi = {
       sender,
       timestamp: new Date(),
       attachments,
+      replyTo,
     };
 
     localStorage.setItem(
@@ -69,11 +71,11 @@ export const issuesApi = {
   },
 
   editIssueMessage: async (
-    disputeId: string,
+    issueId: string,
     messageId: string,
     content: string
   ): Promise<Message> => {
-    const messages = await issuesApi.getIssueMessages(disputeId);
+    const messages = await issuesApi.getIssueMessages(issueId);
     const messageToEdit = messages.find((m) => m.id === messageId);
 
     if (!messageToEdit) {
@@ -88,14 +90,27 @@ export const issuesApi = {
     }
 
     const updatedMessages = messages.map((msg) =>
-      msg.id === messageId ? { ...msg, content } : msg
+      msg.id === messageId ? { ...msg, content, edited: true } : msg
     );
 
     localStorage.setItem(
-      `${STORAGE_PREFIX}_messages_${disputeId}`,
+      `${STORAGE_PREFIX}_messages_${issueId}`,
       JSON.stringify(updatedMessages)
     );
 
-    return { ...messageToEdit, content };
+    return { ...messageToEdit, content, edited: true };
+  },
+
+  deleteIssueMessage: async (
+    issueId: string,
+    messageId: string
+  ): Promise<void> => {
+    const messages = await issuesApi.getIssueMessages(issueId);
+    const updatedMessages = messages.filter((msg) => msg.id !== messageId);
+
+    localStorage.setItem(
+      `${STORAGE_PREFIX}_messages_${issueId}`,
+      JSON.stringify(updatedMessages)
+    );
   },
 };

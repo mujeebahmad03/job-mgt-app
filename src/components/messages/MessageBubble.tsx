@@ -1,6 +1,7 @@
-import { MoreVertical, Edit, Reply } from "lucide-react";
+import { MoreVertical, Edit, Reply, Check, CheckCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { MessageAttachment } from "./MessageAttachment";
+import { MessageReactions, type Reaction } from "./MessageReactions";
 import { type Message } from "@/services/messages";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -20,12 +21,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface MessageBubbleProps {
   message: Message;
   onEdit?: (messageId: string, content: string) => void;
   onDelete?: (messageId: string) => void;
   onReply?: (message: Message) => void;
+  onQuoteClick?: (messageId: string) => void;
   isIssue?: boolean;
 }
 
@@ -34,12 +37,34 @@ export const MessageBubble = ({
   onEdit,
   onDelete,
   onReply,
+  onQuoteClick,
   isIssue = false,
 }: MessageBubbleProps) => {
   const isMobile = useIsMobile();
+  const [reactions, setReactions] = useState<Reaction[]>([
+    { type: "like", count: 0, reacted: false },
+    { type: "dislike", count: 0, reacted: false },
+    { type: "heart", count: 0, reacted: false },
+    { type: "smile", count: 0, reacted: false },
+    { type: "angry", count: 0, reacted: false },
+  ]);
+
+  const handleReaction = (type: Reaction["type"]) => {
+    setReactions((prev) =>
+      prev.map((reaction) =>
+        reaction.type === type
+          ? {
+              ...reaction,
+              count: reaction.reacted ? reaction.count - 1 : reaction.count + 1,
+              reacted: !reaction.reacted,
+            }
+          : reaction
+      )
+    );
+  };
 
   return (
-    <div className="group">
+    <div className="group" id={`message-${message.id}`}>
       <div
         className={`message-bubble ${
           message.sender === "user"
@@ -50,7 +75,10 @@ export const MessageBubble = ({
         }`}
       >
         {message.replyTo && (
-          <div className="reply-to">
+          <div
+            className="reply-to cursor-pointer hover:bg-secondary/30 transition-colors"
+            onClick={() => onQuoteClick?.(message.replyTo!.id)}
+          >
             <span className="text-muted-foreground">
               Replying to {message.replyTo.sender}:
             </span>
@@ -132,10 +160,20 @@ export const MessageBubble = ({
             ))}
           </div>
         )}
-        <div className="timestamp flex items-center gap-2 text-xs opacity-70">
+        <MessageReactions reactions={reactions} onReact={handleReaction} />
+        <div className="timestamp">
           <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
           {message.edited && (
             <span className="text-muted-foreground">(edited)</span>
+          )}
+          {message.sender === "user" && (
+            <span className="ml-auto">
+              {message.read ? (
+                <CheckCheck className="h-3 w-3 text-blue-500" />
+              ) : (
+                <Check className="h-3 w-3" />
+              )}
+            </span>
           )}
         </div>
       </div>
