@@ -57,7 +57,7 @@ export const MessageBubble = ({
     <div className="group" id={`message-${message.id}`}>
       <div
         className={`message-bubble ${
-          message.sender === "user"
+          message.sender === "talent"
             ? "sent"
             : message.sender === "system"
             ? "system"
@@ -77,7 +77,7 @@ export const MessageBubble = ({
         )}
         <div className="flex justify-between items-start gap-2">
           <p>{message.content}</p>
-          {message.sender === "user" && (onEdit || onReply) && (
+          {message.sender === "talent" && (onEdit || onReply) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -143,7 +143,7 @@ export const MessageBubble = ({
           {message.edited && (
             <span className="text-muted-foreground">(edited)</span>
           )}
-          {message.sender === "user" && (
+          {message.sender === "talent" && (
             <span className="ml-auto">
               {message.read ? (
                 <CheckCheck className="h-3 w-3 text-blue-500" />

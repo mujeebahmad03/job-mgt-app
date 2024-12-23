@@ -47,7 +47,7 @@ export const useIssueMessages = (issueId: string) => {
       issuesApi.addIssueMessage(
         issueId,
         data.content,
-        "user",
+        "talent",
         data.attachments,
         data.replyTo
       ),

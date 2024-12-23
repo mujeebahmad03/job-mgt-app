@@ -5,10 +5,12 @@ export interface Attachment {
   preview?: string;
 }
 
+export type MessageSender = "talent" | "business" | "system" | "admin";
+
 export interface Message {
   id: string;
   content: string;
-  sender: "user" | "client" | "system" | "admin";
+  sender: MessageSender;
   timestamp: Date;
   attachments?: Attachment[];
   edited?: boolean;
@@ -16,7 +18,7 @@ export interface Message {
   replyTo?: {
     id: string;
     content: string;
-    sender: "user" | "client" | "system" | "admin";
+    sender: MessageSender;
   };
 }
 

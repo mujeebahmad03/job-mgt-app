@@ -24,7 +24,7 @@ export const useMessages = ({ storageKey }: UseMessagesProps) => {
       messagesApi.addMessage(storageKey, {
         content: messageData.content,
         attachments: messageData.attachments,
-        sender: "user",
+        sender: "talent",
         replyTo: messageData.replyTo,
       }),
     onSuccess: () => {
