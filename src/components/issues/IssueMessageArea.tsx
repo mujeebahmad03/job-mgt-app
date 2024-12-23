@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { type Message, type Attachment } from "@/services/messages";
+import { type Message, type Attachment } from "@/types";
 import { MessageArea } from "../messages/MessageArea";
 
 interface IssueMessageAreaProps {
