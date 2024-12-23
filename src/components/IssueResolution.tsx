@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useIssues, useIssueMessages } from "@/hooks/useIssues";
-import { IssueMessageArea } from "./issues/IssueMessageArea";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-import { Message, type Attachment } from "@/services/messages";
 import { CreateIssue } from "./issues/CreateIssue";
 import { IssueList } from "./issues/IssueList";
+import { IssueMessageArea } from "./issues/IssueMessageArea";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useIssues, useIssueMessages } from "@/hooks/useIssues";
+import { useToast } from "@/hooks/use-toast";
+import { type Message, type Attachment } from "@/types";
 
 export const IssueResolution = ({ jobId }: { jobId: string }) => {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);

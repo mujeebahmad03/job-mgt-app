@@ -1,8 +1,9 @@
 import { MoreVertical, Edit, Reply, Check, CheckCheck } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { MessageAttachment } from "./MessageAttachment";
 import { MessageReactions, type Reaction } from "./MessageReactions";
-import { type Message } from "@/services/messages";
+import { type Message } from "@/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -10,18 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { Alert } from "../Alert";
 
 interface MessageBubbleProps {
   message: Message;
@@ -116,39 +106,26 @@ export const MessageBubble = ({
                   </DropdownMenuItem>
                 )}
                 {!isIssue && onDelete && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
+                  <Alert
+                    actionType="destructive"
+                    title="Delete Message"
+                    description="Are you sure you want to delete this message? This action cannot be undone."
+                    onCompletion={() => onDelete(message.id)}
+                    trigger={
                       <DropdownMenuItem
                         className="text-destructive"
                         onSelect={(e) => e.preventDefault()}
                       >
                         Delete
                       </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Message</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this message? This
-                          action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => onDelete(message.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    }
+                  />
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
+
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.attachments.map((attachment, index) => (

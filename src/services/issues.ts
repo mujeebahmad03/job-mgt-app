@@ -1,5 +1,10 @@
-import { Issue, IssueCategory, MESSAGE_EDIT_WINDOW } from "@/types";
-import { Message, Attachment } from "./messages";
+import {
+  type Message,
+  type Attachment,
+  type Issue,
+  type IssueCategory,
+  MESSAGE_EDIT_WINDOW,
+} from "@/types";
 
 const STORAGE_PREFIX = "issue";
 

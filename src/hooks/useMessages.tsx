@@ -1,9 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  messagesApi,
-  type Message,
-  type Attachment,
-} from "@/services/messages";
+
+import { messagesApi } from "@/services/messages";
+import { type Message, type Attachment } from "@/types";
 
 interface UseMessagesProps {
   storageKey: string;

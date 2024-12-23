@@ -1,24 +1,4 @@
-export interface Attachment {
-  type: "image" | "file";
-  url: string;
-  name: string;
-  preview?: string;
-}
-
-export interface Message {
-  id: string;
-  content: string;
-  sender: "user" | "client" | "system" | "admin";
-  timestamp: Date;
-  attachments?: Attachment[];
-  edited?: boolean;
-  read?: boolean;
-  replyTo?: {
-    id: string;
-    content: string;
-    sender: "user" | "client" | "system" | "admin";
-  };
-}
+import { type Message, type Attachment } from "@/types";
 
 const STORAGE_PREFIX = "messages";
 

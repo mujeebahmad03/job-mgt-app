@@ -1,14 +1,16 @@
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { MessageInput } from "./MessageInput";
 import { AttachmentPreview } from "./AttachmentPreview";
 import { Reply } from "./Reply";
 import { MessageBubble } from "./MessageBubble";
 import { MessageSearch } from "./MessageSearch";
 import { TypingIndicator } from "./TypingIndicator";
+
 import { useHandleAttachment } from "@/hooks/useHandleAttachment";
 import { useHandleMessageActions } from "@/hooks/useHandleMessageActions";
-import { type Attachment, type Message } from "@/services/messages";
+import { type Attachment, type Message } from "@/types";
 import { groupMessagesByDate } from "@/utils/messageGrouping";
 
 interface MessageAreaProps {

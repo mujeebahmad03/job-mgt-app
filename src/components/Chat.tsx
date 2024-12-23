@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { MessageArea } from "./messages/MessageArea";
+
 import { useToast } from "@/hooks/use-toast";
 import { Attachment, useMessages, type Message } from "@/hooks/useMessages";
-import { MessageArea } from "./messages/MessageArea";
 
 export const Chat = () => {
   const { toast } = useToast();

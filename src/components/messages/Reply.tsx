@@ -1,6 +1,7 @@
-import { Message } from "@/services/messages";
-import { Button } from "../ui/button";
 import { X } from "lucide-react";
+
+import { Button } from "../ui/button";
+import { type Message } from "@/types";
 
 interface ReplyProps {
   replyingTo: Message;

@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
+
 import { Button } from "../ui/button";
-import { Attachment } from "@/services/messages";
+import { Attachment } from "@/types";
 
 interface AttachmentPreviewProps {
   attachments: Attachment[];

@@ -1,6 +1,6 @@
 import { Paperclip, Image as ImageIcon, Download } from "lucide-react";
 import { Button } from "../ui/button";
-import { type Attachment } from "@/hooks/useMessages";
+import { type Attachment } from "@/types";
 
 interface MessageAttachmentProps {
   attachment: Attachment;

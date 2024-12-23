@@ -1,7 +1,7 @@
 import { Paperclip, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { type Attachment } from "@/services/messages";
+import { type Attachment } from "@/types";
 
 interface MessageInputProps {
   attachments: Attachment[];

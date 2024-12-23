@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { issuesApi } from "@/services/issues";
-import { IssueCategory } from "@/types";
-import { Message, type Attachment } from "@/services/messages";
+import { type IssueCategory, type Message, type Attachment } from "@/types";
 
 export const useIssues = (jobId: string) => {
   const queryClient = useQueryClient();
